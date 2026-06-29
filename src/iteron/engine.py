@@ -252,6 +252,12 @@ class Iteron:
             self._journal({"action": "compress_skills_failed", "error": str(e)})
 
     def _cold_start(self):
+        best_link = self.exp_dir / "best_solution"
+        if best_link.is_symlink() or best_link.is_dir():
+            best_dir = best_link.resolve() if best_link.is_symlink() else best_link
+            if best_dir.is_dir() and (best_dir / "solution.py").is_file():
+                return self._seed_from(best_dir)
+
         self.state["phase"] = "cold_start"
         problem = self.config.get("problem", "")
         if not problem:
@@ -322,6 +328,25 @@ class Iteron:
             self.state["round"] = 1
         else:
             self.state["phase"] = "failed"
+        self._save_state()
+
+    def _seed_from(self, seed_dir: Path):
+        self._journal({"action": "seed_detected", "seed_dir": str(seed_dir)})
+        result = self._run_eval(seed_dir)
+        score = result.get("score", 0.0)
+        round_n = 1
+        self.state["round"] = round_n
+        self.state["best_score"] = score
+        self.state["best_round"] = round_n
+        self.state["last_scores"] = [score]
+        self.state["phase"] = "greedy"
+        self.dmf.solution.put(f"round_{round_n}", {
+            "score": score, "round": round_n, "phase": "seed",
+        })
+        self._add_cost(result.get("cost", 0.0))
+        best_link = self.exp_dir / "best_solution"
+        best_link.unlink(missing_ok=True)
+        best_link.symlink_to(os.path.relpath(seed_dir, self.exp_dir))
         self._save_state()
 
     def _greedy_loop(self):
