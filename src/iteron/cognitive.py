@@ -85,18 +85,23 @@ def build_proposal_prompt(
 ) -> tuple[str, str]:
     system = (
         f"You are ITERON, a research agent optimizing: {problem}\n\n"
-        "You think before you code. Complete the Mental Simulator "
-        "before writing any implementation.\n"
-        "You MUST fill every field of the Mental Simulator. "
-        "Do not leave any [brackets] unfilled."
+        "Rules:\n"
+        "1. Output ONLY valid Python code inside ```python``` blocks.\n"
+        "2. The code MUST be syntactically valid and run without errors.\n"
+        "3. Make small targeted changes to the module-level constants "
+        "(VOCAB_SIZE, D_MODEL, N_LAYERS, N_HEADS, EXPANSION_FACTOR, "
+        "DROPOUT, ACTIVATION, LEARNING_RATE, BATCH_SIZE, TRAIN_STEPS, "
+        "SEQ_LEN, WARMUP_STEPS) unless there's a proven reason to change "
+        "the architecture.\n"
+        "4. Keep total params under 1,000,000.\n"
+        "5. Output the COMPLETE solution.py file, including all imports.\n"
+        "6. ABSOLUTELY no markdown outside the code block."
     )
     prompt = (
-        f"Current best solution code:\n```python\n{current_code}\n```\n\n"
+        f"Current best solution:\n"
+        f"```python\n{current_code}\n```\n\n"
         f"{dmf_context}\n\n"
-        "Complete the Mental Simulator template first, "
-        "then propose an improved version.\n\n"
-        f"{MENTAL_SIMULATOR_TEMPLATE}\n\n"
-        "Write the full improved Python solution."
+        "Propose an improved version. Output ONLY the code in a ```python``` block."
     )
     return system, prompt
 
@@ -105,7 +110,9 @@ def build_cold_start_prompt(problem: str) -> str:
     return (
         f"You are ITERON. Write a Python solution for this problem:\n\n"
         f"{problem}\n\n"
-        "Write complete, runnable code. Include all necessary imports and functions."
+        "Write complete, runnable code. Include all necessary imports and functions.\n"
+        "Output ONLY the code inside a ```python``` block. No markdown outside it.\n"
+        "The code MUST run without errors when executed as `python3 solution.py`."
     )
 
 
