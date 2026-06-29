@@ -510,7 +510,7 @@ class Iteron:
 
             shutil.rmtree(candidate_dir, ignore_errors=True)
             scores.append(score)
-            gains.append(max(0.0, score - old_best))
+            gains.append(max(0.0, score - old_best) if improved else 0.0)
             if len(scores) > window:
                 scores.pop(0)
             if len(gains) > window:
