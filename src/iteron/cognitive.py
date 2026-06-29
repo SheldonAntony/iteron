@@ -81,7 +81,7 @@ Problem context: {problem}"""
 
 
 def build_proposal_prompt(
-    problem: str, current_code: str, dmf_context: str
+    problem: str, current_code: str, dmf_context: str, web_context: str = ""
 ) -> tuple[str, str]:
     system = (
         f"You are ITERON, a research agent optimizing: {problem}\n\n"
@@ -101,8 +101,10 @@ def build_proposal_prompt(
         f"Current best solution:\n"
         f"```python\n{current_code}\n```\n\n"
         f"{dmf_context}\n\n"
-        "Propose an improved version. Output ONLY the code in a ```python``` block."
     )
+    if web_context:
+        prompt += f"Recent research findings:\n{web_context}\n\n"
+    prompt += "Propose an improved version. Output ONLY the code in a ```python``` block."
     return system, prompt
 
 

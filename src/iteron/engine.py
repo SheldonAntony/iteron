@@ -127,6 +127,19 @@ class Iteron:
                     return code
         return response.strip()
 
+    def _web_search(self, code: str) -> str:
+        try:
+            query = "sub-million parameter transformer language model architecture optimization"
+            result = subprocess.run(
+                ["npx", "mcporter", "call",
+                 f'exa.web_search_exa(query: "{query}", numResults: 3)'],
+                capture_output=True, text=True, timeout=15,
+            )
+            return result.stdout.strip()[:1500]
+        except Exception as e:
+            self._journal({"action": "web_search_failed", "error": str(e)})
+            return ""
+
     def _compute_sdds_tag(self, old_code: str, new_code: str) -> str:
         # ponytail: full diff every round; hash-cache if >100 rounds/round
         old_lines = old_code.splitlines()
@@ -398,8 +411,9 @@ class Iteron:
                 continue
             current_code = sol_path.read_text()
             dmf_context = self._get_dmf_context()
+            web_context = self._web_search(current_code)
             sys_prompt, user_prompt = cognitive.build_proposal_prompt(
-                self.config.get("problem", ""), current_code, dmf_context
+                self.config.get("problem", ""), current_code, dmf_context, web_context
             )
 
             try:
