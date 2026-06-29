@@ -58,10 +58,10 @@ class Chronicle:
         keep = {".chronicle", ".git"}
         for item in list(self.exp_dir.iterdir()):
             if item.name not in keep:
-                if item.is_dir():
-                    shutil.rmtree(item)
-                else:
+                if item.is_symlink() or item.is_file():
                     item.unlink()
+                elif item.is_dir():
+                    shutil.rmtree(item)
         for item in target.iterdir():
             if item.name not in keep:
                 dst = self.exp_dir / item.name
