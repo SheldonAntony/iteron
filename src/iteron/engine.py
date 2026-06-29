@@ -266,6 +266,9 @@ class Iteron:
             self._journal({"action": "compress_skills_failed", "error": str(e)})
 
     def _cold_start(self):
+        if self.state.get("phase") == "greedy":
+            return
+
         best_link = self.exp_dir / "best_solution"
         best_dir = None
         if best_link.is_symlink():
@@ -278,7 +281,7 @@ class Iteron:
         if best_dir is None and best_link.is_dir() and (best_link / "solution.py").is_file():
             best_dir = best_link
         if best_dir is not None:
-                return self._seed_from(best_dir)
+            return self._seed_from(best_dir)
 
         self.state["phase"] = "cold_start"
         problem = self.config.get("problem", "")
