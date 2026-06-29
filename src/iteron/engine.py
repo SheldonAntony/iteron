@@ -401,7 +401,7 @@ class Iteron:
 
             try:
                 new_code = self.model.call(
-                    user_prompt, system=sys_prompt, tier="smart"
+                    user_prompt, system=sys_prompt, tier="fast"
                 )
             except models.ModelError as e:
                 self._journal({"action": "propose_failed", "error": str(e)})
