@@ -26,8 +26,8 @@ class DMFTier:
         self._data[key] = value
         atomic_write(self.path / f"{key}.json", json.dumps(value, indent=2))
 
-    def get(self, key: str) -> Optional[dict]:
-        return self._data.get(key)
+    def get(self, key: str, default: Optional[dict] = None) -> Optional[dict]:
+        return self._data.get(key, default)
 
     def all(self) -> dict[str, dict]:
         return dict(self._data)
