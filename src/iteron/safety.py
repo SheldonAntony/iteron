@@ -47,6 +47,7 @@ class Chronicle:
         shutil.copytree(
             self.exp_dir,
             target,
+            symlinks=True,
             ignore=shutil.ignore_patterns(".chronicle", ".git", "__pycache__"),
         )
 
@@ -65,9 +66,9 @@ class Chronicle:
             if item.name not in keep:
                 dst = self.exp_dir / item.name
                 if item.is_dir():
-                    shutil.copytree(item, dst)
+                    shutil.copytree(item, dst, symlinks=True)
                 else:
-                    shutil.copy2(item, dst)
+                    shutil.copy2(item, dst, follow_symlinks=False)
         return True
 
 
