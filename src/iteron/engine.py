@@ -258,9 +258,17 @@ class Iteron:
 
     def _cold_start(self):
         best_link = self.exp_dir / "best_solution"
-        if best_link.is_symlink() or best_link.is_dir():
-            best_dir = best_link.resolve() if best_link.is_symlink() else best_link
-            if best_dir.is_dir() and (best_dir / "solution.py").is_file():
+        best_dir = None
+        if best_link.is_symlink():
+            try:
+                t = best_link.resolve()
+                if t.exists():
+                    best_dir = t
+            except (OSError, RuntimeError):
+                pass
+        if best_dir is None and best_link.is_dir() and (best_link / "solution.py").is_file():
+            best_dir = best_link
+        if best_dir is not None:
                 return self._seed_from(best_dir)
 
         self.state["phase"] = "cold_start"
@@ -352,10 +360,11 @@ class Iteron:
         })
         self._add_cost(result.get("cost", 0.0))
         best_link = self.exp_dir / "best_solution"
-        if best_link.is_dir():
-            shutil.rmtree(best_link)
-        best_link.unlink(missing_ok=True)
-        best_link.symlink_to(os.path.relpath(seed_dir, self.exp_dir))
+        if best_link != seed_dir:
+            if best_link.is_dir():
+                shutil.rmtree(best_link)
+            best_link.unlink(missing_ok=True)
+            best_link.symlink_to(os.path.relpath(seed_dir, self.exp_dir))
         self._save_state()
 
     def _greedy_loop(self):
