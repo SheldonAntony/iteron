@@ -436,7 +436,7 @@ class Iteron:
                 score = score2
 
             old_best = self.state["best_score"]
-            improved = score > old_best
+            improved = score > old_best and not result.get("error")
 
             round_key = f"round_{self.state['round']}"
             self.dmf.solution.put(round_key, {
