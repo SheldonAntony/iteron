@@ -392,7 +392,7 @@ class Iteron:
 
             try:
                 new_code = self.model.call(
-                    user_prompt, system=sys_prompt, tier="fast"
+                    user_prompt, system=sys_prompt, tier="smart"
                 )
             except models.ModelError as e:
                 self._journal({"action": "propose_failed", "error": str(e)})
@@ -614,7 +614,7 @@ class Iteron:
     def run(self):
         self.state["budget_remaining"] = self.config.get("budget", 50.0)
         self._cold_start()
-        if self.state.get("phase") != "failed":
+        while self.state.get("phase") != "failed" and self.state["budget_remaining"] > 0:
             self._greedy_loop()
 
     def status(self) -> dict:
