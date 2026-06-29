@@ -411,7 +411,7 @@ class Iteron:
                 continue
             current_code = sol_path.read_text()
             dmf_context = self._get_dmf_context()
-            web_context = self._web_search(current_code)
+            web_context = self.state.get("web_context", "")
             sys_prompt, user_prompt = cognitive.build_proposal_prompt(
                 self.config.get("problem", ""), current_code, dmf_context, web_context
             )
@@ -556,6 +556,11 @@ class Iteron:
                     "scores": scores[-window:],
                 })
                 self._escalate_to_problematizer()
+                # Phase 3.5: web search for fresh ideas when stuck
+                web_info = self._web_search(current_code)
+                if web_info:
+                    self.state.setdefault("web_context", web_info)
+                    self._journal({"action": "web_search_result", "snippet": web_info[:200]})
                 # Phase 4: Meta Agent runs after problematizer
                 if self.state["budget_remaining"] > 0:
                     self._meta_agent_suggest()
