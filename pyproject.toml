@@ -11,4 +11,4 @@ dependencies = [
 iteron = "iteron.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["iteron*"]
+where = ["src"]
