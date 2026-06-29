@@ -103,8 +103,11 @@ class Iteron:
     def _resolve_best(self) -> Optional[Path]:
         link = self.exp_dir / "best_solution"
         if link.is_symlink():
-            target = link.resolve()
-            return target if target.exists() else None
+            try:
+                target = link.resolve()
+                return target if target.exists() else None
+            except (OSError, RuntimeError):
+                return None
         if link.is_dir() and (link / "solution.py").is_file():
             return link
         return None
@@ -474,6 +477,8 @@ class Iteron:
                 shutil.rmtree(new_best, ignore_errors=True)
                 shutil.copytree(candidate_dir, new_best)
                 best_link = self.exp_dir / "best_solution"
+                if best_link.is_dir():
+                    shutil.rmtree(best_link)
                 best_link.unlink(missing_ok=True)
                 best_link.symlink_to(
                     os.path.relpath(new_best, self.exp_dir)
