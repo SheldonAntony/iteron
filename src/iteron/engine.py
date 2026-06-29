@@ -338,7 +338,7 @@ class Iteron:
         self._journal({"action": "seed_detected", "seed_dir": str(seed_dir)})
         result = self._run_eval(seed_dir)
         score = result.get("score", 0.0)
-        round_n = 1
+        round_n = 0
         self.state["round"] = round_n
         self.state["best_score"] = score
         self.state["best_round"] = round_n
@@ -471,6 +471,7 @@ class Iteron:
 
             if improved:
                 new_best = self.exp_dir / f"round_{self.state['round']}"
+                shutil.rmtree(new_best, ignore_errors=True)
                 shutil.copytree(candidate_dir, new_best)
                 best_link = self.exp_dir / "best_solution"
                 best_link.unlink(missing_ok=True)
