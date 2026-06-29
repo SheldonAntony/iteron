@@ -105,6 +105,8 @@ class Iteron:
         if link.is_symlink():
             target = link.resolve()
             return target if target.exists() else None
+        if link.is_dir() and (link / "solution.py").is_file():
+            return link
         return None
 
     def _edit_signature(self, old: str, new: str) -> str:
@@ -305,6 +307,8 @@ class Iteron:
                 best_idx = i
 
         best_link = self.exp_dir / "best_solution"
+        if best_link.is_dir():
+            shutil.rmtree(best_link)
         best_link.unlink(missing_ok=True)
         if best_idx >= 0:
             best_dir = self.exp_dir / f"draft_{best_idx}"
@@ -345,6 +349,8 @@ class Iteron:
         })
         self._add_cost(result.get("cost", 0.0))
         best_link = self.exp_dir / "best_solution"
+        if best_link.is_dir():
+            shutil.rmtree(best_link)
         best_link.unlink(missing_ok=True)
         best_link.symlink_to(os.path.relpath(seed_dir, self.exp_dir))
         self._save_state()
