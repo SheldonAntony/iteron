@@ -118,6 +118,15 @@ class Iteron:
     def _error_signature(self, error: str) -> str:
         return hashlib.sha256(error.encode()).hexdigest()[:16]
 
+    def _extract_code(self, response: str) -> str:
+        for m in ("```python\n", "```python ", "```\n", "``` "):
+            if m in response:
+                _, rest = response.split(m, 1)
+                code = rest.rsplit("```", 1)[0].strip()
+                if code:
+                    return code
+        return response.strip()
+
     def _compute_sdds_tag(self, old_code: str, new_code: str) -> str:
         # ponytail: full diff every round; hash-cache if >100 rounds/round
         old_lines = old_code.splitlines()
@@ -407,7 +416,7 @@ class Iteron:
             candidate_dir = self.exp_dir / "candidate"
             shutil.rmtree(candidate_dir, ignore_errors=True)
             candidate_dir.mkdir()
-            (candidate_dir / "solution.py").write_text(new_code)
+            (candidate_dir / "solution.py").write_text(self._extract_code(new_code))
 
             result = self._run_eval(candidate_dir)
             score = result.get("score", 0.0)
